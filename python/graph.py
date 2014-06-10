@@ -2,26 +2,32 @@
 class Graph:
 	def __init__(self, numV):
 		self.numV = numV
-		self.numE = 0
+		# self.numE = 0
 		self.array = [ set() for _ in range(numV) ]
 
 	def V(self): return self.numV
 
-	def E(self): return sum( ( len(s) for s in self.array ) )
+	def E(self): return sum( ( len(s) for s in self.array ) )	# WAS: return self.numE
 
 	def addEdge(self, v, w):
-		assert 0 <= v and v < self.V() , "Vertex " + v + " out of range"
-		assert 0 <= w and w < self.V() , "Vertex " + w + " out of range"
+		assert 0 <= v < self.V() , "Vertex " + v + " out of range"
+		assert 0 <= w < self.V() , "Vertex " + w + " out of range"
 		self.array[v].add(w)
 		self.array[w].add(v)
-		self.numE += 2		# REVIEW
+		# self.numE += 2		# REVIEW
 
 	def adj(self, v):
 		''' Return tuple of vertex numbers connected to v directly by an edge. '''
-		assert 0 <= v and v < self.V() , "Vertex " + v + " out of range"
+		assert 0 <= v < self.V() , "Vertex " + v + " out of range"
 		return tuple(self.array[v])
 
 def createGraph(input):
+	''' Create graph from file:
+			NumVertices\n
+			NumEdges\n
+			V1-V2 [Edge1]
+			...
+	'''
 	numV = int(input.readline())
 	numE = int(input.readline())
 	g = Graph(numV)
@@ -32,6 +38,7 @@ def createGraph(input):
 	return g
 
 def printGraph(g):
+	''' Print graph as parsed by createGraph above. '''
 	print g.V()
 	print g.E()
 	for v in range(g.V()):
@@ -43,8 +50,8 @@ class Paths:
 		import array
 		self.g = g
 		self.s = s #source
-		self.marked = [ False for _ in xrange(g.V()) ]	# FUTURE: array('B', [0 for ... ])
-		self.edgeTo = [ 0 for _ in xrange(g.V()) ]		# FUTURE: array('I', [0 for ... ])
+		self.marked = [ False ] * g.V()	# FUTURE: array('B', [False] * g.V())
+		self.edgeTo = [ 0 ] * g.V()		# FUTURE: array('I', [0] * g.V() ])
 
 	def hasPathTo(self, v):
 		return self.marked[v]
@@ -70,7 +77,7 @@ class DepthFirstPaths(Paths):
 	def _dfs(self, v):
 		# print "Visit", v
 		self.marked[v] = True
-		for w in g.adj(v):
+		for w in self.g.adj(v):		# REVIEW: How can this access g without saying self.g ???
 			if not self.marked[w]:
 				self._dfs(w)
 				self.edgeTo[w] = v
@@ -83,6 +90,7 @@ class BreadthFirstPaths(Paths):
 		self._bfs()		
 
 	def _bfs(self):
+		print dir()
 		from collections import deque
 		q = deque()
 		q.append(self.s)
@@ -91,7 +99,7 @@ class BreadthFirstPaths(Paths):
 			v = q.popleft()
 			# print "Visit", v
 
-			for w in g.adj(v):
+			for w in self.g.adj(v):	# REVIEW: How can this access g without saying self.g ???
 				if not self.marked[w]:
 					q.append(w)
 					self.marked[w] = True
@@ -109,16 +117,16 @@ def disp(path):
 
 if __name__ == '__main__':
 	import sys
-	g = createGraph(sys.stdin)
-	printGraph(g)
+	g1 = createGraph(sys.stdin)
+	printGraph(g1)
 
 	print "DepthFirst"
-	paths = DepthFirstPaths(g, 0)
-	for v in xrange(g.V()):
+	paths = DepthFirstPaths(g1, 0)
+	for v in xrange(g1.V()):
 		print "Path(%d,%d) = %s" % (0, v, disp(paths.getPathTo(v)))
 
 	print
 	print "BreadthFirst (shortest)"
-	paths = BreadthFirstPaths(g, 0)
-	for v in xrange(g.V()):
+	paths = BreadthFirstPaths(g1, 0)
+	for v in xrange(g1.V()):
 		print "Path(%d,%d) = %s" % (0, v, disp(paths.getPathTo(v)))
