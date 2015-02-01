@@ -54,13 +54,22 @@ class BST:
 		self.root = None
 
 	@staticmethod
-	def _get(h, key):
+	def _getRecursive__OLD(h, key):
 		if not h:
 			return None
 		c = cmp(key, h.key)
 		if   c == 0 : return h.value
 		elif c < 0  : return BST._get(h.left, key)
 		else        : return BST._get(h.right, key)
+
+	@staticmethod
+	def _get(h, key):
+		while h:
+			c = cmp(key, h.key)
+			if   c == 0 : return h.value
+			elif c < 0  : h = h.left
+			else        : h = h.right
+		return None
 
 	def get(self, key):
 		return BST._get(self.root, key)
